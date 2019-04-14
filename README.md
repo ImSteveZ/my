@@ -1,5 +1,5 @@
 # my
-my原net/http包的基础上实现了一些简洁的golang web工具，支持并发安全的上下文(Contex)传递及链式的http请求与响应处理(中间件)
+my在原net/http包的基础上实现了一些简洁的golang web工具，支持并发安全的上下文(Contex)传递及链式的http请求与响应处理(中间件)
 ---
 ```go
 package main
