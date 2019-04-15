@@ -32,7 +32,7 @@ func Auth(ctx *mygo.Ctx, w http.ResponseWriter, r *http.Request) bool {
 }
 
 func News(ctx *mygo.Ctx, w http.ResponseWriter, r *http.Request) bool {
-	w.Write([]byte("welcome to news category"))
+	w.Write([]byte("welcome to news category\n"))
 	return true
 }
 
