@@ -2,6 +2,7 @@ package mygo
 
 import (
 	"net/http"
+	"strings"
 	"sync"
 )
 
@@ -18,8 +19,19 @@ type Myx struct {
 // 指针操作的panic
 func (myx *Myx) HandleFunc(pattern string, funcs ...func(*Ctx, http.ResponseWriter, *http.Request) bool) {
 	myx.once.Do(myx.initServeMux) // 检测初始化ServeMux
+	var pathKey string            // path参数键名
+	if pathParts := strings.Split(pattern, "/:"); len(pathParts) > 1 {
+		pattern = pathParts[0] + "/"
+		pathKey = pathParts[1]
+	}
 	myx.ServeMux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 		ctx := new(Ctx)
+		// 解析路径参数值并写入Ctx
+		// 注：此处当路径参数值为空时不做404响应拦截，便于后续http
+		// 处理函数根据Ctx中对应key的value是否为空做更灵活的处理
+		if pathKey != "" {
+			ctx.Set(pathKey, r.URL.Path[len(pattern):])
+		}
 		for _, f := range funcs {
 			if !f(ctx, w, r) {
 				return
