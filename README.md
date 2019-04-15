@@ -8,7 +8,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"mygo"
+	"github.com/imstevez/mygo"
 	"net/http"
 )
 
