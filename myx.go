@@ -1,3 +1,4 @@
+// SIMPLE IS THE BEST
 package mygo
 
 import (
@@ -19,19 +20,13 @@ type Myx struct {
 // 指针操作的panic
 func (myx *Myx) HandleFunc(pattern string, funcs ...func(*Ctx, http.ResponseWriter, *http.Request) bool) {
 	myx.once.Do(myx.initServeMux) // 检测初始化ServeMux
-	var pathKey string            // path参数键名
-	if pathParts := strings.Split(pattern, "/:"); len(pathParts) > 1 {
-		pattern = pathParts[0] + "/"
-		pathKey = pathParts[1]
+	// myx屏蔽标准包http.ServeMux对以"/"结尾的路由模式的支持，只支持根路由"/"及精确匹配的路由(不以"/"结束的路由)
+	// 原因：更加明确URL路径与URL查询参数的动态与静态分工，提供简洁单一的路由绑定方式
+	if pattern != "/" && strings.HasSuffix(pattern, "/") {
+		panic("myx: unsupported pattern")
 	}
 	myx.ServeMux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 		ctx := new(Ctx)
-		// 解析路径参数值并写入Ctx
-		// 注：此处当路径参数值为空时不做404响应拦截，便于后续http
-		// 处理函数根据Ctx中对应key的value是否为空做更灵活的处理
-		if pathKey != "" {
-			ctx.Set(pathKey, r.URL.Path[len(pattern):])
-		}
 		for _, f := range funcs {
 			if !f(ctx, w, r) {
 				return
@@ -60,4 +55,6 @@ func (myx *Myx) initServeMux() {
 }
 
 // NewMyx方法返回一个初始化了ServeMux的Myx类型指针
-func NewMyx() *Myx { return &Myx{ServeMux: http.NewServeMux()} }
+func NewMyx() *Myx {
+	return &Myx{ServeMux: http.NewServeMux()}
+}
