@@ -1,6 +1,6 @@
 # MYGO: SIMPLE IS THE BEST
-mygo在原生http.ServeMux的基础上，提供一个简洁，支持上下文传递与链式http处理的go web路由绑定工具
-### 使用
++ mygo在原生http.ServeMux的基础上，提供一个简洁，支持上下文传递与链式http处理的go web路由绑定工具
+### 使用示例
 ```go
 package main
 
