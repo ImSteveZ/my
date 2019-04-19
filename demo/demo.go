@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"mygo"
@@ -14,36 +15,30 @@ func main() {
 	// 绑定文件服务
 	r.HandleFile("/", "./public")
 	// 绑定单个处理函数
-	r.HandleFunc("/news", News)
+	r.HandleFunc("/news", []func(context.Context, func()){}, News)
 	// 线定多个有序http处理函数
-	r.HandleFunc("/usr", Auth, Usr)
+	r.HandleFunc("/usr", []func(context.Context, func()){Auth}, Usr)
 
 	// 启动服务
 	log.Fatal(http.ListenAndServe(":3000", r))
 }
 
 // Auth http处理函数
-func Auth(c *mygo.Context, w http.ResponseWriter, r *http.Request) (next bool) {
-	// 设置Context
-	c.Set("username", "Alice")
-	// 向下执行
-	next = true
-	return
+func Auth(ctx context.Context, next func()) {
+	ctx.WithValue("username", "Bob")
+	next()
 }
 
 // News http处理函数
-func News(c *mygo.Context, w http.ResponseWriter, r *http.Request) (next bool) {
-	fmt.Fprintf(w, "Welcome to news category\n")
-	return
+func News(ctx context.Context) {
+	meta := ctx.Value("meta").(*mygo.Meta)
+	fmt.Fprintf(meta.W, "Welcome to news category\n")
 }
 
 // Usr http处理函数
-func Usr(c *mygo.Context, w http.ResponseWriter, r *http.Request) (next bool) {
+func Usr(ctx context.Context) {
 	// 获取Context
-	user := c.Get("username")
-	if user == "" {
-		user = "Guest"
-	}
-	fmt.Fprintf(w, "Hello, %s\n", user.(string))
-	return
+	user := ctx.Value("username").(string)
+	meta := ctx.Value("meta").(*mygo.Meta)
+	fmt.Fprintf(meta.W, "Hello, %s\n", user)
 }
