@@ -8,7 +8,7 @@ r.From(路由规则).Use(中间件列表).Do(控制器)
 ```
 ### Todo
 + 基于trie模型重构路由规则
-+ RESTFULL风格接口支持
++ RESTFUL风格注册接口支持
 ### Sample
 ```go
 package sample
