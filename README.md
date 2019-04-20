@@ -1,54 +1,88 @@
-# MYGO: SIMPLE IS THE BEST
-+ mygo在原生http.ServeMux的基础上，提供一个简洁，支持上下文传递与链式http处理的go web路由绑定工具
-### 使用示例
+# nicego: simple is the best
++ nicego封装了http.ServeMux，在原生路由功能的基础上提供中间件装饰，上下文传递支持
++ nicego的封装比较保守，仅提供方式单一的外部调用接口：
 ```go
-package main
+r := nicego.NewRouter(context.Background())
+r.From(路由规则).Use(中间件列表).Do(控制器)
+```
+### Sample
+```go
+package sample
 
 import (
+	"net/http"
+	"imstevez/nicego"
 	"fmt"
 	"log"
-	"github.com/iamstevez/mygo"
-	"net/http"
+	"time"
+	"context"
 )
 
 func main() {
-	// 创建mygo.router指针
-	r := mygo.NewRouter()
+	// 获取route句柄
+	r := nicego.NewRoute(context.Background())
 
-	// 绑定文件服务
-	r.HandleFile("/", "./public")
-	// 绑定单个处理函数
-	r.HandleFunc("/news", News)
-	// 线定多个有序http处理函数
-	r.HandleFunc("/usr", Auth, Usr)
+	r.Static("/", "./public")	// 静态文件服务
+	r.From("/hello").Do(HelloCtrl)	// 单一控制器路由注册
+	r.From("/news").Use(Logger).Do(NewsCtrl)	// 单中间件路由注册
+	r.From("/user").Use(Logger, Auth).Do(UserCtrl)	// 多中间件路由注册
 
-	// 启动服务
-	log.Fatal(http.ListenAndServe(":3000", r))
-}
-
-// Auth http处理函数
-func Auth(c *mygo.Context, w http.ResponseWriter, r *http.Request) (next bool) {
-	// 设置Context
-	c.Set("username", "Alice")
-	// 向下执行
-	next = true
-	return
-}
-
-// News http处理函数
-func News(c *mygo.Context, w http.ResponseWriter, r *http.Request) (next bool) {
-	fmt.Fprintf(w, "Welcome to news category\n")
-	return
-}
-
-// Usr http处理函数
-func Usr(c *mygo.Context, w http.ResponseWriter, r *http.Request) (next bool) {
-	// 获取Context
-	user := c.Get("username")
-	if user == "" {
-		user = "Guest"
+	// 开启http服务
+	err := http.ListenAndServe(":3000", r)
+	if err != nil {
+		log.Fatal(err)
 	}
-	fmt.Fprintf(w, "Hello, %s\n", user.(string))
-	return
+}
+
+// Hello 控制器
+func HelloCtrl(ctx context.Context) {
+	w, r := nicego.GetMeta(ctx)
+	fmt.Fprintf(w, "Hello, world.")
+}
+
+// Logger 日志中间件
+func Logger(ctx context.Context, next func(context.Context)) {
+	t := time.Now()
+	_, r := nicego.GetMeta(ctx)
+
+	comFmt := "|---REQ ---[%-4s] %-20s |\n"
+	log.Printf(comFmt, meta.Req.Method, meta.Req.URL.Path)
+
+	next(ctx)
+
+	outFmt := "|---RESP---[%-4s] %-20s | %-10s\n"
+	log.Printf(outFmt, meta.Req.Method, meta.Req.URL.Path, time.Now().Sub(t))
+}
+
+// Auth 中间件
+func Auth(ctx context.Context, next func(context.Context)) {
+		authrizedUsers := map[string]struct{}{
+				"Alice": struct{}{},
+				"Bob": struct{}{},
+		}
+		w, r := nicego.GetMeta(ctx)
+		params := r.URL.Query()
+		if username := params.Get("username"); username != "" {
+				if _, ok := authrizedUsers[username]; ok {
+						next(context.WithValue(ctx, nicego.CtxKey("username"), username))
+				} else {
+						fmt.Fprintf(w, "Unauthrized user: %s.\n", username)
+				}
+		} else {
+				fmt.Frintf(w, "Please provide your name.\n")
+		}
+}
+
+// NewsCtrl 中间件
+func NewsCtrl(ctx context.Context) {
+		w, _ := GetMeta(ctx)
+		fmt.Fprintf(w, "Welcome to news category.\n")
+}
+
+// UserCtrl 中间件
+func UserCtrl(ctx context.Context) {
+		w, _ := GetMeta(ctx)
+		user := ctx.Value(nicego.CtxKey("username").(string)
+		fmt.Fprintf(w, "Hello, %s.\n", user)
 }
 ```
