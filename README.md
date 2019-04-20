@@ -1,4 +1,4 @@
-# nicego: simple is the best
+# NICEGO: SIMPLE IS THE BEST
 ### Desc
 + nicego基于标准包的http.ServeMux，在原生路由功能的基础上提供对中间件装饰和上下文传递支持
 + nicego类型封比较严格，提供方式单一且优雅的外部调用接口：
