@@ -1,15 +1,14 @@
 // ===============================================
-// Description  : routeR.go
+// Description  : nicego/meta.go
 // Author       : StevE.Z
 // Email        : stevzhang01@gmail
 // Date         : 2019-04-20 20:51:30
-// LastEditTime : 2019-04-20 22:34:48
 // ================================================
 package nicego
 
 import (
-	"net/http"
 	"context"
+	"net/http"
 )
 
 // metaKey
@@ -23,8 +22,9 @@ type metaVal struct {
 
 // GetMeta
 func GetMeta(ctx context.Context) (http.ResponseWriter, *http.Request) {
-	if meta := ctx.Value(metaKey{}).(metaVal); meta != nil {
-		return meta.w, meta.r
+	if mt := ctx.Value(metaKey{}); mt != nil {
+		mtv := mt.(metaVal)
+		return mtv.w, mtv.r
 	} else {
 		return nil, nil
 	}

@@ -1,15 +1,14 @@
 // ===============================================
-// Description  : route.go
+// Description  : nicego/route.go
 // Author       : StevE.Z
 // Email        : stevzhang01@gmail
 // Date         : 2019-04-20 20:51:30
-// LastEditTime : 2019-04-20 22:34:48
 // ================================================
 package nicego
 
 import (
-	"net/http"
 	"context"
+	"net/http"
 )
 
 // route
@@ -21,12 +20,6 @@ type route struct {
 // NewRoute
 func NewRoute(ctx context.Context) *route {
 	return &route{ctx: ctx, mux: http.NewServeMux()}
-}
-
-// Static
-func (rt *route) Static(pattern, dir string) {
-	fileServer := http.FileServer(http.Dir(dir))
-	rt.mux.Handle(pattern, http.StripPrefix(pattern, fileServer))
 }
 
 // From
