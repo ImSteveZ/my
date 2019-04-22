@@ -1,8 +1,8 @@
 // ===============================================
 // Description  : nciego/router.go
 // Author       : StevE.Z
-// Email        : stevzhang01@gmail
-// Date         : 2019-04-20 20:51:30
+// Email        : stevzhang01@gmail.com
+// Date         : 2019-04-22 10:32:05
 // ================================================
 package nicego
 
@@ -12,14 +12,14 @@ import (
 )
 
 // router
-type router struct {
-	route       *route
+type Router struct {
+	route       *Route
 	pattern     string
 	middlewares []func(context.Context, func(context.Context))
 }
 
 // injectMiddlewares
-func injectMiddlewares(rtr *router, controller func(context.Context)) func(w http.ResponseWriter, r *http.Request) {
+func injectMiddlewares(rtr *Router, controller func(context.Context)) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var (
 			next func(context.Context)
@@ -41,18 +41,18 @@ func injectMiddlewares(rtr *router, controller func(context.Context)) func(w htt
 }
 
 // Use
-func (rtr *router) Use(middlewares ...func(context.Context, func(context.Context))) *router {
+func (rtr *Router) Use(middlewares ...func(context.Context, func(context.Context))) *Router {
 	rtr.middlewares = append(rtr.middlewares, middlewares...)
 	return rtr
 }
 
 // Do
-func (rtr *router) Do(controller func(context.Context)) {
+func (rtr *Router) Do(controller func(context.Context)) {
 	rtr.route.mux.HandleFunc(rtr.pattern, injectMiddlewares(rtr, controller))
 }
 
 // Static
-func (rtr *router) Static(dir string) {
+func (rtr *Router) Static(dir string) {
 	fileHandler := http.StripPrefix(rtr.pattern, http.FileServer(http.Dir(dir)))
 	staticContrller := func(ctx context.Context) {
 		w, r := GetMeta(ctx)

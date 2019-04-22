@@ -1,8 +1,8 @@
 // ===============================================
 // Description  : nicego/meta.go
 // Author       : StevE.Z
-// Email        : stevzhang01@gmail
-// Date         : 2019-04-20 20:51:30
+// Email        : stevzhang01@gmail.com
+// Date         : 2019-04-22 10:33:10
 // ================================================
 package nicego
 
